@@ -1,0 +1,88 @@
+<body>
+	<canvas id=the-canvas></canvas>
+	<canvas id=the-stamp></canvas>
+</body>
+<style>
+canvas {
+	border: solid 1px black;
+}
+</style>
+<script src="pdf.js"></script>
+<script>
+var mail = []
+
+var pageNumber = 1
+var scale = 1
+var url = 'page.pdf'
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js'
+
+var stampCanvas = document.getElementById('the-stamp')
+var stampContext = stampCanvas.getContext('2d')
+
+var pdfCanvas = document.getElementById('the-canvas')
+var pdfContext = pdfCanvas.getContext('2d')
+
+var stamp = []
+
+function renderPage(page, canvas, context) {
+	//uses:
+	//  pdfjsLib
+	//  canvas
+	//  context
+	//settings:
+	//  scale
+	//products:
+	//  promise(render)
+
+	var viewport = page.getViewport({ scale: scale, })
+
+	canvas.height = viewport.height
+	canvas.width = viewport.width
+	var renderContext = {
+		canvasContext: context,
+		viewport: viewport
+	}
+	var renderTask = page.render(renderContext)
+	var rendered = renderTask.promise.then(function () {
+		console.log('Page rendered')
+	})
+
+	return rendered
+}
+
+function showPDF() {
+	//uses:
+	//  url/pdf
+	//  renderPage
+	//products:
+	//  promise(render)
+
+	//the above looks pretty clean. Is there no internal state
+	//for keeping things moving smoothly
+
+	var loadingTask = pdfjsLib.getDocument(url)
+	return loadingTask.promise.then(function(pdf) {
+		console.log('PDF loaded')
+
+		pdf.getPage(pageNumber).then(renderPage, pdfCanvas, pdfContext)
+	}, function (reason) {
+		console.error(reason)
+	})
+}
+
+function getStamp(idx) {
+	if (idx in stamp) {
+		return stamp[idx]
+	} else {
+
+	}
+}
+
+function renderStamp() {
+	//
+}
+
+showPDF()
+
+</script>
